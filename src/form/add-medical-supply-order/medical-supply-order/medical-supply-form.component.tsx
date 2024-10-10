@@ -113,7 +113,7 @@ export function MedicalSupplyOrderForm({
         onWorkspaceClose: () => launchPatientWorkspace('order-basket'),
       });
     },
-    [orders, setOrders, closeWorkspace, session?.currentProvider?.uuid, defaultValues],
+    [orders, setOrders, session?.currentProvider?.uuid, defaultValues, closeWorkspaceWithSavedChanges],
   );
 
   const cancelOrder = useCallback(() => {

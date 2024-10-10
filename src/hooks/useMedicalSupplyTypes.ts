@@ -47,7 +47,7 @@ function useMedicalSupplyConceptsSWR(labOrderableConcepts?: Array<string>) {
     return labOrderableConcepts
       ? (data as Array<ConceptResult>)?.flatMap((d) => d.data.setMembers)
       : (data as ConceptResults)?.data.setMembers ?? ([] as Concept[]);
-  }, [data, isLoading, error]);
+  }, [data, isLoading, error, labOrderableConcepts]);
 
   return {
     data: results,
@@ -78,7 +78,7 @@ export function useMedicalSupplyTypes(searchTerm = ''): UseMedicalSupplyType {
     return searchTerm && !isLoading && !error
       ? fuzzy.filter(searchTerm, testConcepts, { extract: (c) => c.label }).map((result) => result.original)
       : testConcepts;
-  }, [testConcepts, searchTerm]);
+  }, [testConcepts, searchTerm, error, isLoading]);
 
   return {
     testTypes: filteredTestTypes,
