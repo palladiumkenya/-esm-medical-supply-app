@@ -3,7 +3,7 @@ import useSWRImmutable from 'swr/immutable';
 import fuzzy from 'fuzzy';
 import { type FetchResponse, openmrsFetch, useConfig, restBaseUrl, reportError } from '@openmrs/esm-framework';
 
-import { type RadiologyConfig } from '../config-schema';
+import { type MedicalSupplyConfig } from '../config-schema';
 import {type Concept } from '../types';
 
 type ConceptResult = FetchResponse<Concept>;
@@ -28,12 +28,12 @@ function openmrsFetchMultiple(urls: Array<string>) {
 }
 
 function useMedicalSupplyConceptsSWR(labOrderableConcepts?: Array<string>) {
-  const config = useConfig<RadiologyConfig>();
+  const config = useConfig<MedicalSupplyConfig>();
   const { data, isLoading, error } = useSWRImmutable(
     () =>
       labOrderableConcepts
         ? labOrderableConcepts.map((c) => `${restBaseUrl}/concept/${c}`)
-        : `${restBaseUrl}/concept/${config.radiologyConceptSetUuid}?v=custom:setMembers`,
+        : `${restBaseUrl}/concept/${config.medicalSupplyConceptSetUuid}?v=custom:setMembers`,
     (labOrderableConcepts ? openmrsFetchMultiple : openmrsFetch) as any,
     {
       shouldRetryOnError(err) {
@@ -57,9 +57,9 @@ function useMedicalSupplyConceptsSWR(labOrderableConcepts?: Array<string>) {
 }
 
 export function useMedicalSupplyTypes(searchTerm = ''): UseMedicalSupplyType {
-  const { labOrderableConcepts } = useConfig<RadiologyConfig>().orders;
+  const { medicalSupplyOrderableConcepts } = useConfig<MedicalSupplyConfig>().orders;
 
-  const { data, isLoading, error } = useMedicalSupplyConceptsSWR(labOrderableConcepts.length ? labOrderableConcepts : null);
+  const { data, isLoading, error } = useMedicalSupplyConceptsSWR(medicalSupplyOrderableConcepts.length ? medicalSupplyOrderableConcepts : null);
 
   useEffect(() => {
     if (error) {

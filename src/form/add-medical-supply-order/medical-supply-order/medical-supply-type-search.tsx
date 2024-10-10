@@ -9,7 +9,7 @@ import styles from './medical-supply-type-search.scss';
 import { type MedicalSupplyOrderBasketItem } from '../../../types';
 import { createEmptyMedicalSupplyOrder } from './medical-supply-order';
 import { type MedicalSupplyType, useMedicalSupplyTypes } from '../../../hooks/useMedicalSupplyTypes';
-import { prepRadiologyOrderPostData } from '../api';
+import { prepMedicalSupplyOrderPostData } from '../api';
 
 export interface TestTypeSearchProps {
   openLabForm: (searchResult: MedicalSupplyOrderBasketItem) => void;
@@ -138,7 +138,7 @@ interface TestTypeSearchResultItemProps {
 const TestTypeSearchResultItem: React.FC<TestTypeSearchResultItemProps> = ({ testType, openOrderForm }) => {
   const isTablet = useLayoutType() === 'tablet';
   const session = useSession();
-  const { orders, setOrders } = useOrderBasket<MedicalSupplyOrderBasketItem>('medicalsupply', prepRadiologyOrderPostData);
+  const { orders, setOrders } = useOrderBasket<MedicalSupplyOrderBasketItem>('medicalsupply', prepMedicalSupplyOrderPostData);
   const testTypeAlreadyInBasket = useMemo(
     () => orders?.some((order) => order.testType.conceptUuid === testType.conceptUuid),
     [orders, testType],
@@ -157,7 +157,7 @@ const TestTypeSearchResultItem: React.FC<TestTypeSearchResultItemProps> = ({ tes
     const labOrder = createMedicalSupplyOrder(testType);
     labOrder.isOrderIncomplete = true;
     setOrders([...orders, labOrder]);
-    closeWorkspace('add-radiology-order', {
+    closeWorkspace('add-medical-supply-order', {
       ignoreChanges: true,
       onWorkspaceClose: () => launchPatientWorkspace('order-basket'),
     });

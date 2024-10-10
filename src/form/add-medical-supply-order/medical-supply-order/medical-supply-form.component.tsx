@@ -28,12 +28,12 @@ import { Controller, type FieldErrors, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 //import { moduleName } from '../../../constants';
-import { type RadiologyConfig } from '../../../config-schema';
+import { type MedicalSupplyConfig } from '../../../config-schema';
 import styles from './medical-supply-form.scss';
 import { type MedicalSupplyOrderBasketItem } from '../../../types';
 import { priorityOptions } from './medical-supply-order';
 import { useMedicalSupplyTypes } from '../../../hooks/useMedicalSupplyTypes';
-import { careSettingUuid, prepRadiologyOrderPostData } from '../api';
+import { careSettingUuid, prepMedicalSupplyOrderPostData } from '../api';
 
 export interface MedicalSupplyOrderFormProps {
   initialOrder: MedicalSupplyOrderBasketItem;
@@ -54,7 +54,7 @@ export function MedicalSupplyOrderForm({
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
   const session = useSession();
-  const { orders, setOrders } = useOrderBasket<MedicalSupplyOrderBasketItem>('medicalsupply', prepRadiologyOrderPostData);
+  const { orders, setOrders } = useOrderBasket<MedicalSupplyOrderBasketItem>('medicalsupply', prepMedicalSupplyOrderPostData);
   const { testTypes, isLoading: isLoadingTestTypes, error: errorLoadingTestTypes } = useMedicalSupplyTypes();
   const [showErrorNotification, setShowErrorNotification] = useState(false);
 
@@ -63,9 +63,9 @@ export function MedicalSupplyOrderForm({
     { value: 'RIGHT', label: 'Right' },
     { value: 'BILATERAL', label: 'Bilateral' },
   ];
-  const config = useConfig<RadiologyConfig>();
+  const config = useConfig<MedicalSupplyConfig>();
 
-  const radiologyOrderFormSchema = z.object({
+  const medicalSupplyOrderFormSchema = z.object({
     instructions: z.string().optional(),
     urgency: z.string().refine((value) => value !== '', {
       //message: translateFrom(moduleName, 'addLabOrderPriorityRequired', 'Priority is required'),
@@ -89,7 +89,7 @@ export function MedicalSupplyOrderForm({
     formState: { errors, defaultValues, isDirty },
   } = useForm<MedicalSupplyOrderBasketItem>({
     mode: 'all',
-    resolver: zodResolver(radiologyOrderFormSchema),
+    resolver: zodResolver(medicalSupplyOrderFormSchema),
     defaultValues: {
       ...initialOrder,
     },

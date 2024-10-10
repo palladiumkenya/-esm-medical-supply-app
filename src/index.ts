@@ -5,14 +5,14 @@ import {
   translateFrom,
 } from "@openmrs/esm-framework";
 import { configSchema } from "./config-schema";
+import MedicalSupplyOrderBasketPanelExtension from "./form/add-medical-supply-order/medical-supply-order-basket-panel/medical-supply-order-basket-panel.extension";
 
 //import { createLeftPanelLink } from "./left-panel-link";
-//import RadiologyOrderBasketPanelExtension from "./form/radiology-orders/radiology-order-basket-panel/radiology-order-basket-panel.extension";
 
-const moduleName = "@openmrs/esm-radiology-app";
+const moduleName = "@openmrs/esm-medical-supply-app";
 
 const options = {
-  featureName: "openmrs/esm-radiology-app",
+  featureName: "openmrs/esm-medical-supply-app",
   moduleName,
 };
 
@@ -32,25 +32,12 @@ export const root = getAsyncLifecycle(
   options
 );
 
-// export const radiologyDashboardLink = getSyncLifecycle(
-//   createLeftPanelLink({
-//     name: "radiology",
-//     title: "Radiology",
-//   }),
-//   options
-// );
-
-// export const addRadiologyToWorklistDialogComponent = getSyncLifecycle(
-//   addRadiologyToWorklistDialog,
-//   options
-// );
 
 
-
-// export const radiologyOrderPanel = getSyncLifecycle(
-//   RadiologyOrderBasketPanelExtension,
-//   options
-// );
+export const medicalSupplyOrderPanel = getSyncLifecycle(
+  MedicalSupplyOrderBasketPanelExtension,
+  options
+);
 
 // t('addMedicalSupplyOrderWorkspaceTitle', 'Add Medical Supply order')
 

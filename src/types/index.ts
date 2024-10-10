@@ -36,14 +36,14 @@ export interface MedicalSupplyOrderBasketItem extends OrderBasketItem {
   bodySite?: string;
 }
 
-export type OrderFrequency = CommonRadiologyValueCoded;
-export type DurationUnit = CommonRadiologyValueCoded;
+export type OrderFrequency = CommonMedicalSupplyValueCoded;
+export type DurationUnit = CommonMedicalSupplyValueCoded;
 
-interface CommonRadiologyProps {
+interface CommonMedicalSupplyProps {
   value: string;
   default?: boolean;
 }
 
-export interface CommonRadiologyValueCoded extends CommonRadiologyProps {
+export interface CommonMedicalSupplyValueCoded extends CommonMedicalSupplyProps {
   valueCoded: string;
 }

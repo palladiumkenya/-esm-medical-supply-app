@@ -38,23 +38,23 @@ export function useOrderReasons(conceptUuids: Array<string>) {
   return { orderReasons: orderReasons, isLoading };
 }
 
-export interface RadiologyOrderPost extends OrderPost {
+export interface MedicalSupplyOrderPost extends OrderPost {
   scheduledDate?: Date | string;
   commentToFulfiller?: string;
   laterality?: string;
   bodySite?: string;
 }
 
-export function prepRadiologyOrderPostData(
+export function prepMedicalSupplyOrderPostData(
   order: MedicalSupplyOrderBasketItem,
   patientUuid: string,
   encounterUuid: string
-): RadiologyOrderPost {
+): MedicalSupplyOrderPost {
   let payload = {};
   if (order.action === "NEW" || order.action === "RENEW") {
     payload = {
       action: "NEW",
-      type: "procedureorder",
+      type: "medicalsupplyorder",
       patient: patientUuid,
       careSetting: careSettingUuid,
       orderer: order.orderer,

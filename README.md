@@ -1,4 +1,4 @@
-# OpenMRS 3.x Radiology ESM
+# OpenMRS 3.x Medical Supply ESM
 
 A frontend module for medical supply  tracking, built on OpenMRS 3.x
 

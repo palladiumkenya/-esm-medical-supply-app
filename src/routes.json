@@ -5,6 +5,12 @@
     "webservices.rest": "^2.24.0"
   },
   "extensions": [
+    {
+      "name": "medical-supply-order-panel",
+      "component": "medicalSupplyOrderPanel",
+      "slot": "order-basket-slot",
+      "order": 3
+    }
   
   ],
   "workspaces": [
