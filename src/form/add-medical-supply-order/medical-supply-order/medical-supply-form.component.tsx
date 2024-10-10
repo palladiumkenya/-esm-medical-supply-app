@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
-import { launchPatientWorkspace, useOrderBasket } from '@openmrs/esm-patient-common-lib';
+import { type DefaultPatientWorkspaceProps,launchPatientWorkspace, useOrderBasket } from '@openmrs/esm-patient-common-lib';
 import {
   translateFrom,
   useLayoutType,
   useSession,
   useConfig,
-  DefaultWorkspaceProps,
   ExtensionSlot,
 } from '@openmrs/esm-framework';
 import {
@@ -37,9 +36,9 @@ import { careSettingUuid, prepMedicalSupplyOrderPostData } from '../api';
 
 export interface MedicalSupplyOrderFormProps {
   initialOrder: MedicalSupplyOrderBasketItem;
-  closeWorkspace: DefaultWorkspaceProps['closeWorkspace'];
-  closeWorkspaceWithSavedChanges: DefaultWorkspaceProps['closeWorkspaceWithSavedChanges'];
-  promptBeforeClosing: DefaultWorkspaceProps['promptBeforeClosing'];
+  closeWorkspace: DefaultPatientWorkspaceProps['closeWorkspace'];
+  closeWorkspaceWithSavedChanges: DefaultPatientWorkspaceProps['closeWorkspaceWithSavedChanges'];
+  promptBeforeClosing: DefaultPatientWorkspaceProps['promptBeforeClosing'];
 }
 
 // Designs:
