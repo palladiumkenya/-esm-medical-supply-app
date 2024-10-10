@@ -164,7 +164,7 @@ export function MedicalSupplyOrderForm({
                     <ComboBox
                       size="lg"
                       id="testTypeInput"
-                      titleText={t('testType', 'Test type')}
+                      titleText={t('medicalSupplyType', 'Medical supply type')}
                       selectedItem={value}
                       items={testTypes}
                       placeholder={
