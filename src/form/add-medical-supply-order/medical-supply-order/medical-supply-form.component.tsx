@@ -1,13 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
-import { type DefaultPatientWorkspaceProps,launchPatientWorkspace, useOrderBasket } from '@openmrs/esm-patient-common-lib';
 import {
-  translateFrom,
-  useLayoutType,
-  useSession,
-  useConfig,
-  ExtensionSlot,
-} from '@openmrs/esm-framework';
+  type DefaultPatientWorkspaceProps,
+  launchPatientWorkspace,
+  useOrderBasket,
+} from '@openmrs/esm-patient-common-lib';
+import { translateFrom, useLayoutType, useSession, useConfig, ExtensionSlot } from '@openmrs/esm-framework';
 import {
   Button,
   ButtonSet,
@@ -53,7 +51,10 @@ export function MedicalSupplyOrderForm({
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
   const session = useSession();
-  const { orders, setOrders } = useOrderBasket<MedicalSupplyOrderBasketItem>('medicalsupply', prepMedicalSupplyOrderPostData);
+  const { orders, setOrders } = useOrderBasket<MedicalSupplyOrderBasketItem>(
+    'medicalsupply',
+    prepMedicalSupplyOrderPostData,
+  );
   const { testTypes, isLoading: isLoadingTestTypes, error: errorLoadingTestTypes } = useMedicalSupplyTypes();
   const [showErrorNotification, setShowErrorNotification] = useState(false);
 
@@ -72,7 +73,7 @@ export function MedicalSupplyOrderForm({
     testType: z.object(
       { label: z.string(), conceptUuid: z.string() },
       {
-       // required_error: translateFrom(moduleName, 'addLabOrderLabTestTypeRequired', 'Test type is required'),
+        // required_error: translateFrom(moduleName, 'addLabOrderLabTestTypeRequired', 'Test type is required'),
         //invalid_type_error: translateFrom(moduleName, 'addLabOrderLabReferenceRequired', 'Test type is required'),
       },
     ),
