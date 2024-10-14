@@ -8,9 +8,9 @@ import { launchPatientWorkspace, useOrderBasket } from '@openmrs/esm-patient-com
 import styles from './medical-supply-type-search.scss';
 import { type MedicalSupplyOrderBasketItem } from '../../../types';
 import { createEmptyMedicalSupplyOrder } from './medical-supply-order';
-import { type MedicalSupplyType, useMedicalSupplyTypes } from '../../../hooks/useMedicalSupplyTypes';
+import { type MedicalSupplyType } from '../../../hooks/useMedicalSupplyTypes';
 import { prepMedicalSupplyOrderPostData } from '../api';
-import { useMedicalSupplyConceptsByName } from './medical-supply-order.resource';
+import { useMedicalSupplySearch } from './medical-supply-order.resource';
 
 export interface MedicalSupplyTypeSearchProps {
   openMedicalSupplyForm: (searchResult: MedicalSupplyOrderBasketItem) => void;
@@ -59,11 +59,17 @@ interface MedicalSupplyTypeSearchResultsProps {
   focusAndClearSearchInput: () => void;
 }
 
-function MedicalSupplyTypeSearchResults({ searchTerm, openOrderForm, focusAndClearSearchInput }: MedicalSupplyTypeSearchResultsProps) {
+function MedicalSupplyTypeSearchResults({
+  searchTerm,
+  openOrderForm,
+  focusAndClearSearchInput,
+}: MedicalSupplyTypeSearchResultsProps) {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
-  const { medicalSupplyTypes, isLoading, error } = useMedicalSupplyTypes(searchTerm);
-  const {searchResults, isSearching} = useMedicalSupplyConceptsByName(searchTerm, 'Medical supply');
+  const { searchResults, isLoading, error } = useMedicalSupplySearch(searchTerm, 'Medical supply');
+  if (!searchTerm) {
+    return <div className={styles.container}></div>;
+  }
 
   if (isLoading) {
     return <MedicalSupplyTypeSearchSkeleton />;
@@ -88,13 +94,13 @@ function MedicalSupplyTypeSearchResults({ searchTerm, openOrderForm, focusAndCle
 
   return (
     <>
-      {medicalSupplyTypes?.length ? (
+      {searchResults?.length ? (
         <div className={styles.container}>
           {searchTerm && (
             <div className={styles.orderBasketSearchResultsHeader}>
               <span className={styles.searchResultsCount}>
                 {t('searchResultsMatchesForTerm', '{{count}} results for "{{searchTerm}}"', {
-                  count: medicalSupplyTypes?.length,
+                  count: searchResults?.length,
                   searchTerm,
                 })}
               </span>
@@ -104,8 +110,12 @@ function MedicalSupplyTypeSearchResults({ searchTerm, openOrderForm, focusAndCle
             </div>
           )}
           <div className={styles.resultsContainer}>
-            {medicalSupplyTypes.map((testType) => (
-              <MedicalSupplyTypeSearchResultItem key={testType.conceptUuid} testType={testType} openOrderForm={openOrderForm} />
+            {searchResults.map((testType) => (
+              <MedicalSupplyTypeSearchResultItem
+                key={testType.conceptUuid}
+                testType={testType}
+                openOrderForm={openOrderForm}
+              />
             ))}
           </div>
         </div>
@@ -137,10 +147,16 @@ interface MedicalSupplyTypeSearchResultItemProps {
   openOrderForm: (searchResult: MedicalSupplyOrderBasketItem) => void;
 }
 
-const MedicalSupplyTypeSearchResultItem: React.FC<MedicalSupplyTypeSearchResultItemProps> = ({ testType, openOrderForm }) => {
+const MedicalSupplyTypeSearchResultItem: React.FC<MedicalSupplyTypeSearchResultItemProps> = ({
+  testType,
+  openOrderForm,
+}) => {
   const isTablet = useLayoutType() === 'tablet';
   const session = useSession();
-  const { orders, setOrders } = useOrderBasket<MedicalSupplyOrderBasketItem>('medicalsupply', prepMedicalSupplyOrderPostData);
+  const { orders, setOrders } = useOrderBasket<MedicalSupplyOrderBasketItem>(
+    'medicalsupply',
+    prepMedicalSupplyOrderPostData,
+  );
   const testTypeAlreadyInBasket = useMemo(
     () => orders?.some((order) => order.testType.conceptUuid === testType.conceptUuid),
     [orders, testType],

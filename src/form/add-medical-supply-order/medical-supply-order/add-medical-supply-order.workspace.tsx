@@ -27,12 +27,9 @@ export default function AddMedicalSupplyOrderWorkspace({
 }: AddMedicalSupplyOrderWorkspace) {
   const { t } = useTranslation();
 
-  const { patient, isLoading: isLoadingPatient } = usePatient();
   const [currentMedicalSupplyOrder, setCurrentMedicalSupplyOrder] = useState(initialOrder);
 
   const isTablet = useLayoutType() === 'tablet';
-
-  const patientName = `${patient?.name?.[0]?.given?.join(' ')} ${patient?.name?.[0].family}`;
 
   const cancelOrder = useCallback(() => {
     closeWorkspace({
@@ -68,46 +65,4 @@ export default function AddMedicalSupplyOrderWorkspace({
       />
     );
   }
-
-  // return (
-  //   <div className={styles.container}>
-  //     {isTablet && !isLoadingPatient && (
-  //       <div className={styles.patientHeader}>
-  //         <span className={styles.bodyShort02}>{patientName}</span>
-  //         <span className={classNames(styles.text02, styles.bodyShort01)}>
-  //           {capitalize(patient?.gender)} &middot; {age(patient?.birthDate)} &middot;{' '}
-  //           <span>
-  //             {formatDate(parseDate(patient?.birthDate), {
-  //               mode: 'wide',
-  //               time: false,
-  //             })}
-  //           </span>
-  //         </span>
-  //       </div>
-  //     )}
-  //     {!isTablet && (
-  //       <div className={styles.backButton}>
-  //         <Button
-  //           kind="ghost"
-  //           renderIcon={(props) => <ArrowLeft size={24} {...props} />}
-  //           iconDescription="Return to order basket"
-  //           size="sm"
-  //           onClick={cancelOrder}
-  //         >
-  //           <span>{t('backToOrderBasket', 'Back to order basket')}</span>
-  //         </Button>
-  //       </div>
-  //     )}
-  //     {!currentMedicalSupplyOrder ? (
-  //       <MedicalSupplyTypeSearch openMedicalSupplyForm={setCurrentMedicalSupplyOrder} />
-  //     ) : (
-  //       <MedicalSupplyOrderForm
-  //         initialOrder={currentMedicalSupplyOrder}
-  //         closeWorkspace={closeWorkspace}
-  //         closeWorkspaceWithSavedChanges={closeWorkspaceWithSavedChanges}
-  //         promptBeforeClosing={promptBeforeClosing}
-  //       />
-  //     )}
-  //   </div>
-  // );
 }

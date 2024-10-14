@@ -51,3 +51,14 @@ export interface Concept {
   display: string;
   uuid: string;
 }
+export interface MedicalSupply {
+  concept: {
+    uuid: string;
+    display: string;
+  };
+  conceptName: {
+    uuid: string;
+    display: string;
+  };
+  display: string;
+}

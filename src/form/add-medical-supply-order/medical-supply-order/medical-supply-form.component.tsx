@@ -67,7 +67,11 @@ export function MedicalSupplyOrderForm({
     testType: z.object(
       { label: z.string(), conceptUuid: z.string() },
       {
-        required_error: translateFrom(moduleName, 'addMedOrderMedicalSupplyTypeRequired', 'Medical supply type is required')
+        required_error: translateFrom(
+          moduleName,
+          'addMedOrderMedicalSupplyTypeRequired',
+          'Medical supply type is required',
+        ),
       },
     ),
     scheduleDate: z.union([z.string(), z.date(), z.string().optional()]),
@@ -76,7 +80,6 @@ export function MedicalSupplyOrderForm({
     quantity: z.number().refine((value) => value !== null && value !== undefined && value > 0, {
       message: translateFrom(moduleName, 'quantityRequired', 'Quantity is required'),
     }),
- 
   });
 
   const {
@@ -158,9 +161,11 @@ export function MedicalSupplyOrderForm({
                       id="medicalSupplyTypeInput"
                       titleText={t('medicalSupplyType', 'Medical supply type')}
                       selectedItem={value}
-                      items={medicalSupplyTypes}
+                      items={''}
                       placeholder={
-                        isLoadingTestTypes ? `${t('loading', 'Loading')}...` : t('medicalSupplyTypePlaceholder', 'Select one')
+                        isLoadingTestTypes
+                          ? `${t('loading', 'Loading')}...`
+                          : t('medicalSupplyTypePlaceholder', 'Select one')
                       }
                       onBlur={onBlur}
                       disabled={isLoadingTestTypes}
