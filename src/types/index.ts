@@ -29,8 +29,6 @@ export interface MedicalSupplyOrderBasketItem extends OrderBasketItem {
   };
   urgency?: string;
   instructions?: string;
-  orderReason?: string;
-  scheduleDate?: Date | string;
   quantity?: number;
   quantityUnits?: string;
 }

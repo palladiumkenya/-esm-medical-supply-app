@@ -28,7 +28,6 @@ import { type MedicalSupplyConfig } from '../../../config-schema';
 import styles from './medical-supply-form.scss';
 import { type MedicalSupplyOrderBasketItem } from '../../../types';
 import { priorityOptions } from './medical-supply-order';
-import { useMedicalSupplyTypes } from '../../../hooks/useMedicalSupplyTypes';
 import { careSettingUuid, prepMedicalSupplyOrderPostData } from '../api';
 
 export interface MedicalSupplyOrderFormProps {
@@ -54,7 +53,6 @@ export function MedicalSupplyOrderForm({
     'medicalsupply',
     prepMedicalSupplyOrderPostData,
   );
-  const { medicalSupplyTypes, isLoading: isLoadingTestTypes, error: errorLoadingTestTypes } = useMedicalSupplyTypes();
   const [showErrorNotification, setShowErrorNotification] = useState(false);
 
   const config = useConfig<MedicalSupplyConfig>();
@@ -74,12 +72,14 @@ export function MedicalSupplyOrderForm({
         ),
       },
     ),
-    scheduleDate: z.union([z.string(), z.date(), z.string().optional()]),
     commentsToFulfiller: z.string().optional(),
     quantityUnits: z.string().optional(),
-    quantity: z.number().refine((value) => value !== null && value !== undefined && value > 0, {
-      message: translateFrom(moduleName, 'quantityRequired', 'Quantity is required'),
-    }),
+    quantity: z
+      .number({
+        required_error: translateFrom(moduleName, 'quantityRequired', 'Quantity is required'),
+        invalid_type_error: translateFrom(moduleName, 'quantityInvalid', 'Quantity must be a number'),
+      })
+      .min(1, { message: translateFrom(moduleName, 'quantityMin', 'Quantity must be greater than 0') }),
   });
 
   const {
@@ -128,19 +128,8 @@ export function MedicalSupplyOrderForm({
     promptBeforeClosing(() => isDirty);
   }, [isDirty, promptBeforeClosing]);
 
-  const [showScheduleDate, setShowScheduleDate] = useState(false);
-
   return (
     <>
-      {errorLoadingTestTypes && (
-        <InlineNotification
-          kind="error"
-          lowContrast
-          className={styles.inlineNotification}
-          title={t('errorLoadingMedicalSupplyTypes', 'Error occurred when loading medical supply types')}
-          subtitle={t('tryReopeningTheForm', 'Please try launching the form again')}
-        />
-      )}
       <Form
         className={styles.orderForm}
         onSubmit={handleSubmit(handleFormSubmission, onError)}
@@ -161,15 +150,10 @@ export function MedicalSupplyOrderForm({
                       id="medicalSupplyTypeInput"
                       titleText={t('medicalSupplyType', 'Medical supply type')}
                       selectedItem={value}
-                      items={''}
-                      placeholder={
-                        isLoadingTestTypes
-                          ? `${t('loading', 'Loading')}...`
-                          : t('medicalSupplyTypePlaceholder', 'Select one')
-                      }
                       onBlur={onBlur}
-                      disabled={isLoadingTestTypes}
-                      onChange={({ selectedItem }) => onChange(selectedItem)}
+                      onChange={({ selectedItem }) => {
+                        onChange(selectedItem);
+                      }}
                       invalid={errors.testType?.message}
                       invalidText={errors.testType?.message}
                     />
@@ -194,7 +178,6 @@ export function MedicalSupplyOrderForm({
                       onBlur={onBlur}
                       onChange={({ selectedItem }) => {
                         onChange(selectedItem?.value || '');
-                        setShowScheduleDate(selectedItem?.label === 'Scheduled');
                       }}
                       invalid={errors.urgency?.message}
                       invalidText={errors.urgency?.message}
@@ -212,15 +195,18 @@ export function MedicalSupplyOrderForm({
                   control={control}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <NumberInput
-                      enableCounter
+                      hideSteppers={true}
+                      allowEmpty={false}
                       id="quantityInput"
                       size="lg"
                       label={t('quantity', 'Quantity')}
                       value={value}
-                      onChange={onChange}
+                      onChange={(e) => {
+                        onChange(Number(e.target?.value));
+                      }}
                       onBlur={onBlur}
-                      min={0}
-                      invalid={errors.quantity?.message}
+                      min={1}
+                      invalid={!!errors.quantity?.message}
                       invalidText={errors.quantity?.message}
                     />
                   )}
@@ -267,8 +253,6 @@ export function MedicalSupplyOrderForm({
                       onChange={onChange}
                       onBlur={onBlur}
                       maxCount={500}
-                      invalid={errors.instructions?.message}
-                      invalidText={errors.instructions?.message}
                     />
                   )}
                 />

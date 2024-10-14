@@ -39,10 +39,8 @@ export function useOrderReasons(conceptUuids: Array<string>) {
 }
 
 export interface MedicalSupplyOrderPost extends OrderPost {
-  scheduledDate?: Date | string;
-  commentToFulfiller?: string;
-  laterality?: string;
-  bodySite?: string;
+  quantity?: number;
+  quantityUnits?: string;
 }
 
 export function prepMedicalSupplyOrderPostData(
@@ -61,12 +59,8 @@ export function prepMedicalSupplyOrderPostData(
       encounter: encounterUuid,
       concept: order.testType.conceptUuid,
       instructions: order.instructions,
-      orderReason: order.orderReason,
       urgency: order.urgency,
     };
-    if (order.urgency === "ON_SCHEDULED_DATE") {
-      payload["scheduledDate"] = order.scheduleDate;
-    }
     return payload;
   } else if (order.action === "REVISE") {
     payload = {
@@ -78,12 +72,8 @@ export function prepMedicalSupplyOrderPostData(
       encounter: encounterUuid,
       concept: order.testType.conceptUuid,
       instructions: order.instructions,
-      orderReason: order.orderReason,
 
     };
-    if (order.urgency === "ON_SCHEDULED_DATE") {
-      payload["scheduledDate"] = order.scheduleDate;
-    }
     return payload;
   } else if (order.action === "DISCONTINUE") {
     payload = {
@@ -94,11 +84,7 @@ export function prepMedicalSupplyOrderPostData(
       orderer: order.orderer,
       encounter: encounterUuid,
       concept: order.testType.conceptUuid,
-      orderReason: order.orderReason,
     };
-    if (order.urgency === "ON_SCHEDULED_DATE") {
-      payload["scheduledDate"] = order.scheduleDate;
-    }
     return payload;
   } else {
     throw new Error(`Unknown order action: ${order.action}.`);

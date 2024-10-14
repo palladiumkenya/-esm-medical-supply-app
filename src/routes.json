@@ -9,7 +9,7 @@
       "name": "medical-supply-order-panel",
       "component": "medicalSupplyOrderPanel",
       "slot": "order-basket-slot",
-      "order": 3
+      "order": 5
     }
   
   ],
