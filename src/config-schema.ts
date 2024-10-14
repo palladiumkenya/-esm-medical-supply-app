@@ -25,7 +25,7 @@ export const configSchema = {
 };
 
 interface OrderReason {
-  labTestUuid: string;
+  medicalSupplyUuid: string;
   required: boolean;
   orderReasons: Array<string>;
 }
@@ -35,5 +35,5 @@ export type MedicalSupplyConfig = {
     medicalSupplyOrderableConcepts: Array<string>;
     medicalSupplyOrderTypeUuid: string;
   };
-  labTestsWithOrderReasons: Array<OrderReason>;
+  medicalSupplyWithOrderReasons: Array<OrderReason>;
 };

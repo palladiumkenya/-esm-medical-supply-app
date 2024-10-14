@@ -15,7 +15,7 @@ export interface MedicalSupplyType {
 }
 
 export interface UseMedicalSupplyType {
-  testTypes: Array<MedicalSupplyType>;
+  medicalSupplyTypes: Array<MedicalSupplyType>;
   isLoading: boolean;
   error: Error;
 }
@@ -27,14 +27,14 @@ function openmrsFetchMultiple(urls: Array<string>) {
   return Promise.all(urls.map((url) => openmrsFetch<{ results: Array<Concept> }>(url)));
 }
 
-function useMedicalSupplyConceptsSWR(labOrderableConcepts?: Array<string>) {
+function useMedicalSupplyConceptsSWR(medicalSupplyOrderableConcepts?: Array<string>) {
   const config = useConfig<MedicalSupplyConfig>();
   const { data, isLoading, error } = useSWRImmutable(
     () =>
-      labOrderableConcepts
-        ? labOrderableConcepts.map((c) => `${restBaseUrl}/concept/${c}`)
+        medicalSupplyOrderableConcepts
+        ? medicalSupplyOrderableConcepts.map((c) => `${restBaseUrl}/concept/${c}`)
         : `${restBaseUrl}/concept/${config.medicalSupplyConceptSetUuid}?v=custom:setMembers`,
-    (labOrderableConcepts ? openmrsFetchMultiple : openmrsFetch) as any,
+    (medicalSupplyOrderableConcepts ? openmrsFetchMultiple : openmrsFetch) as any,
     {
       shouldRetryOnError(err) {
         return err instanceof Response;
@@ -44,10 +44,10 @@ function useMedicalSupplyConceptsSWR(labOrderableConcepts?: Array<string>) {
 
   const results = useMemo(() => {
     if (isLoading || error) return null;
-    return labOrderableConcepts
+    return medicalSupplyOrderableConcepts
       ? (data as Array<ConceptResult>)?.flatMap((d) => d.data.setMembers)
       : (data as ConceptResults)?.data.setMembers ?? ([] as Concept[]);
-  }, [data, isLoading, error, labOrderableConcepts]);
+  }, [data, isLoading, error, medicalSupplyOrderableConcepts]);
 
   return {
     data: results,
@@ -74,14 +74,14 @@ export function useMedicalSupplyTypes(searchTerm = ''): UseMedicalSupplyType {
     }));
   }, [data]);
 
-  const filteredTestTypes = useMemo(() => {
+  const filteredMedicalSupplyTypes = useMemo(() => {
     return searchTerm && !isLoading && !error
       ? fuzzy.filter(searchTerm, testConcepts, { extract: (c) => c.label }).map((result) => result.original)
       : testConcepts;
   }, [testConcepts, searchTerm, error, isLoading]);
 
   return {
-    testTypes: filteredTestTypes,
+    medicalSupplyTypes: filteredMedicalSupplyTypes,
     isLoading: isLoading,
     error: error,
   };

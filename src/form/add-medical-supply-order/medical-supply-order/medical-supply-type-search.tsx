@@ -10,12 +10,13 @@ import { type MedicalSupplyOrderBasketItem } from '../../../types';
 import { createEmptyMedicalSupplyOrder } from './medical-supply-order';
 import { type MedicalSupplyType, useMedicalSupplyTypes } from '../../../hooks/useMedicalSupplyTypes';
 import { prepMedicalSupplyOrderPostData } from '../api';
+import { useMedicalSupplyConceptsByName } from './medical-supply-order.resource';
 
-export interface TestTypeSearchProps {
-  openLabForm: (searchResult: MedicalSupplyOrderBasketItem) => void;
+export interface MedicalSupplyTypeSearchProps {
+  openMedicalSupplyForm: (searchResult: MedicalSupplyOrderBasketItem) => void;
 }
 
-export function TestTypeSearch({ openLabForm }: TestTypeSearchProps) {
+export function MedicalSupplyTypeSearch({ openMedicalSupplyForm }: MedicalSupplyTypeSearchProps) {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm);
@@ -43,28 +44,29 @@ export function TestTypeSearch({ openLabForm }: TestTypeSearchProps) {
           value={searchTerm}
         />
       </ResponsiveWrapper>
-      <TestTypeSearchResults
+      <MedicalSupplyTypeSearchResults
         searchTerm={debouncedSearchTerm}
-        openOrderForm={openLabForm}
+        openOrderForm={openMedicalSupplyForm}
         focusAndClearSearchInput={focusAndClearSearchInput}
       />
     </>
   );
 }
 
-interface TestTypeSearchResultsProps {
+interface MedicalSupplyTypeSearchResultsProps {
   searchTerm: string;
   openOrderForm: (searchResult: MedicalSupplyOrderBasketItem) => void;
   focusAndClearSearchInput: () => void;
 }
 
-function TestTypeSearchResults({ searchTerm, openOrderForm, focusAndClearSearchInput }: TestTypeSearchResultsProps) {
+function MedicalSupplyTypeSearchResults({ searchTerm, openOrderForm, focusAndClearSearchInput }: MedicalSupplyTypeSearchResultsProps) {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
-  const { testTypes, isLoading, error } = useMedicalSupplyTypes(searchTerm);
+  const { medicalSupplyTypes, isLoading, error } = useMedicalSupplyTypes(searchTerm);
+  const {searchResults, isSearching} = useMedicalSupplyConceptsByName(searchTerm, 'Medical supply');
 
   if (isLoading) {
-    return <TestTypeSearchSkeleton />;
+    return <MedicalSupplyTypeSearchSkeleton />;
   }
 
   if (error) {
@@ -86,13 +88,13 @@ function TestTypeSearchResults({ searchTerm, openOrderForm, focusAndClearSearchI
 
   return (
     <>
-      {testTypes?.length ? (
+      {medicalSupplyTypes?.length ? (
         <div className={styles.container}>
           {searchTerm && (
             <div className={styles.orderBasketSearchResultsHeader}>
               <span className={styles.searchResultsCount}>
                 {t('searchResultsMatchesForTerm', '{{count}} results for "{{searchTerm}}"', {
-                  count: testTypes?.length,
+                  count: medicalSupplyTypes?.length,
                   searchTerm,
                 })}
               </span>
@@ -102,8 +104,8 @@ function TestTypeSearchResults({ searchTerm, openOrderForm, focusAndClearSearchI
             </div>
           )}
           <div className={styles.resultsContainer}>
-            {testTypes.map((testType) => (
-              <TestTypeSearchResultItem key={testType.conceptUuid} testType={testType} openOrderForm={openOrderForm} />
+            {medicalSupplyTypes.map((testType) => (
+              <MedicalSupplyTypeSearchResultItem key={testType.conceptUuid} testType={testType} openOrderForm={openOrderForm} />
             ))}
           </div>
         </div>
@@ -130,12 +132,12 @@ function TestTypeSearchResults({ searchTerm, openOrderForm, focusAndClearSearchI
   );
 }
 
-interface TestTypeSearchResultItemProps {
+interface MedicalSupplyTypeSearchResultItemProps {
   testType: MedicalSupplyType;
   openOrderForm: (searchResult: MedicalSupplyOrderBasketItem) => void;
 }
 
-const TestTypeSearchResultItem: React.FC<TestTypeSearchResultItemProps> = ({ testType, openOrderForm }) => {
+const MedicalSupplyTypeSearchResultItem: React.FC<MedicalSupplyTypeSearchResultItemProps> = ({ testType, openOrderForm }) => {
   const isTablet = useLayoutType() === 'tablet';
   const session = useSession();
   const { orders, setOrders } = useOrderBasket<MedicalSupplyOrderBasketItem>('medicalsupply', prepMedicalSupplyOrderPostData);
@@ -154,9 +156,9 @@ const TestTypeSearchResultItem: React.FC<TestTypeSearchResultItemProps> = ({ tes
   const { t } = useTranslation();
 
   const addToBasket = useCallback(() => {
-    const labOrder = createMedicalSupplyOrder(testType);
-    labOrder.isOrderIncomplete = true;
-    setOrders([...orders, labOrder]);
+    const medicalSupplyOrder = createMedicalSupplyOrder(testType);
+    medicalSupplyOrder.isOrderIncomplete = true;
+    setOrders([...orders, medicalSupplyOrder]);
     closeWorkspace('add-medical-supply-order', {
       ignoreChanges: true,
       onWorkspaceClose: () => launchPatientWorkspace('order-basket'),
@@ -210,7 +212,7 @@ const TestTypeSearchResultItem: React.FC<TestTypeSearchResultItemProps> = ({ tes
   );
 };
 
-const TestTypeSearchSkeleton = () => {
+const MedicalSupplyTypeSearchSkeleton = () => {
   const isTablet = useLayoutType() === 'tablet';
   const tileClassName = `${isTablet ? `${styles.tabletSearchResultTile}` : `${styles.desktopSearchResultTile}`} ${
     styles.skeletonTile

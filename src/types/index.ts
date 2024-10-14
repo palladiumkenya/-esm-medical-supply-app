@@ -1,4 +1,4 @@
-import { type OrderBasketItem } from "@openmrs/esm-patient-common-lib";
+import { type OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 
 export interface Concept {
   uuid: string;
@@ -31,9 +31,8 @@ export interface MedicalSupplyOrderBasketItem extends OrderBasketItem {
   instructions?: string;
   orderReason?: string;
   scheduleDate?: Date | string;
-  commentsToFulfiller?: string;
-  laterality?: string;
-  bodySite?: string;
+  quantity?: number;
+  quantityUnits?: string;
 }
 
 export type OrderFrequency = CommonMedicalSupplyValueCoded;
@@ -46,4 +45,9 @@ interface CommonMedicalSupplyProps {
 
 export interface CommonMedicalSupplyValueCoded extends CommonMedicalSupplyProps {
   valueCoded: string;
+}
+
+export interface Concept {
+  display: string;
+  uuid: string;
 }

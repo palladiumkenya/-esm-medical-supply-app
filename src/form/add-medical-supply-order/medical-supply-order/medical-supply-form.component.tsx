@@ -11,20 +11,19 @@ import {
   ButtonSet,
   Column,
   ComboBox,
-  DatePicker,
-  DatePickerInput,
   Form,
   Layer,
   Grid,
   InlineNotification,
   TextArea,
+  NumberInput,
 } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 
 import { Controller, type FieldErrors, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-//import { moduleName } from '../../../constants';
+import { moduleName } from '../../../constants';
 import { type MedicalSupplyConfig } from '../../../config-schema';
 import styles from './medical-supply-form.scss';
 import { type MedicalSupplyOrderBasketItem } from '../../../types';
@@ -55,32 +54,29 @@ export function MedicalSupplyOrderForm({
     'medicalsupply',
     prepMedicalSupplyOrderPostData,
   );
-  const { testTypes, isLoading: isLoadingTestTypes, error: errorLoadingTestTypes } = useMedicalSupplyTypes();
+  const { medicalSupplyTypes, isLoading: isLoadingTestTypes, error: errorLoadingTestTypes } = useMedicalSupplyTypes();
   const [showErrorNotification, setShowErrorNotification] = useState(false);
 
-  const lateralityItems = [
-    { value: 'LEFT', label: 'Left' },
-    { value: 'RIGHT', label: 'Right' },
-    { value: 'BILATERAL', label: 'Bilateral' },
-  ];
   const config = useConfig<MedicalSupplyConfig>();
 
   const medicalSupplyOrderFormSchema = z.object({
     instructions: z.string().optional(),
     urgency: z.string().refine((value) => value !== '', {
-      //message: translateFrom(moduleName, 'addLabOrderPriorityRequired', 'Priority is required'),
+      message: translateFrom(moduleName, 'addMedicalSupplyOrderPriorityRequired', 'Priority is required'),
     }),
     testType: z.object(
       { label: z.string(), conceptUuid: z.string() },
       {
-        // required_error: translateFrom(moduleName, 'addLabOrderLabTestTypeRequired', 'Test type is required'),
-        //invalid_type_error: translateFrom(moduleName, 'addLabOrderLabReferenceRequired', 'Test type is required'),
+        required_error: translateFrom(moduleName, 'addMedOrderMedicalSupplyTypeRequired', 'Medical supply type is required')
       },
     ),
     scheduleDate: z.union([z.string(), z.date(), z.string().optional()]),
     commentsToFulfiller: z.string().optional(),
-    laterality: z.string().optional(),
-    bodySite: z.string().optional(),
+    quantityUnits: z.string().optional(),
+    quantity: z.number().refine((value) => value !== null && value !== undefined && value > 0, {
+      message: translateFrom(moduleName, 'quantityRequired', 'Quantity is required'),
+    }),
+ 
   });
 
   const {
@@ -94,10 +90,6 @@ export function MedicalSupplyOrderForm({
       ...initialOrder,
     },
   });
-
-  const orderReasonUuids =
-    (config.labTestsWithOrderReasons?.find((c) => c.labTestUuid === defaultValues?.testType?.conceptUuid) || {})
-      .orderReasons || [];
 
   const handleFormSubmission = useCallback(
     (data: MedicalSupplyOrderBasketItem) => {
@@ -142,7 +134,7 @@ export function MedicalSupplyOrderForm({
           kind="error"
           lowContrast
           className={styles.inlineNotification}
-          title={t('errorLoadingTestTypes', 'Error occured when loading test types')}
+          title={t('errorLoadingMedicalSupplyTypes', 'Error occurred when loading medical supply types')}
           subtitle={t('tryReopeningTheForm', 'Please try launching the form again')}
         />
       )}
@@ -163,12 +155,12 @@ export function MedicalSupplyOrderForm({
                   render={({ field: { onChange, onBlur, value } }) => (
                     <ComboBox
                       size="lg"
-                      id="testTypeInput"
+                      id="medicalSupplyTypeInput"
                       titleText={t('medicalSupplyType', 'Medical supply type')}
                       selectedItem={value}
-                      items={testTypes}
+                      items={medicalSupplyTypes}
                       placeholder={
-                        isLoadingTestTypes ? `${t('loading', 'Loading')}...` : t('testTypePlaceholder', 'Select one')
+                        isLoadingTestTypes ? `${t('loading', 'Loading')}...` : t('medicalSupplyTypePlaceholder', 'Select one')
                       }
                       onBlur={onBlur}
                       disabled={isLoadingTestTypes}
@@ -207,54 +199,47 @@ export function MedicalSupplyOrderForm({
               </InputWrapper>
             </Column>
           </Grid>
-          {showScheduleDate && (
-            <Grid className={styles.gridRow}>
-              <Column lg={16} md={4} sm={4}>
-                <div className={styles.fullWidthDatePickerContainer}>
-                  <InputWrapper>
-                    <Controller
-                      name="scheduleDate"
-                      control={control}
-                      render={({ field: { onBlur, value, onChange, ref } }) => (
-                        <DatePicker
-                          datePickerType="single"
-                          value={value}
-                          onChange={([newStartDate]) => onChange(newStartDate)}
-                          onBlur={onBlur}
-                          ref={ref}
-                        >
-                          <DatePickerInput
-                            id="scheduleDatePicker"
-                            placeholder="mm/dd/yyyy"
-                            labelText={t('scheduleDate', 'Scheduled date')}
-                            size="lg"
-                          />
-                        </DatePicker>
-                      )}
-                    />
-                  </InputWrapper>
-                </div>
-              </Column>
-            </Grid>
-          )}
           <Grid className={styles.gridRow}>
             <Column lg={16} md={8} sm={4}>
               <InputWrapper>
                 <Controller
-                  name="laterality"
+                  name="quantity"
+                  control={control}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <NumberInput
+                      enableCounter
+                      id="quantityInput"
+                      size="lg"
+                      label={t('quantity', 'Quantity')}
+                      value={value}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      min={0}
+                      invalid={errors.quantity?.message}
+                      invalidText={errors.quantity?.message}
+                    />
+                  )}
+                />
+              </InputWrapper>
+            </Column>
+          </Grid>
+          <Grid className={styles.gridRow}>
+            <Column lg={8} md={8} sm={4}>
+              <InputWrapper>
+                <Controller
+                  name="quantityUnits"
                   control={control}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <ComboBox
                       size="lg"
-                      id="lateralityInput"
-                      titleText={t('laterality', 'Laterality')}
-                      selectedItem={lateralityItems?.find((option) => option.value === value) || null}
-                      items={lateralityItems}
+                      id="quantityUnits"
+                      titleText={t('quantityUnits', 'Quantity Units')}
+                      selectedItem={priorityOptions.find((option) => option.value === value) || null} // TODO: replace with actual units
+                      items={priorityOptions}
                       onBlur={onBlur}
-                      onChange={({ selectedItem }) => onChange(selectedItem?.value || '')}
-                      invalid={errors.laterality?.message}
-                      invalidText={errors.laterality?.message}
-                      itemToString={(item) => item?.label}
+                      onChange={({ selectedItem }) => {
+                        onChange(selectedItem?.value || '');
+                      }}
                     />
                   )}
                 />
@@ -279,30 +264,6 @@ export function MedicalSupplyOrderForm({
                       maxCount={500}
                       invalid={errors.instructions?.message}
                       invalidText={errors.instructions?.message}
-                    />
-                  )}
-                />
-              </InputWrapper>
-            </Column>
-          </Grid>
-          <Grid className={styles.gridRow}>
-            <Column lg={16} md={8} sm={4}>
-              <InputWrapper>
-                <Controller
-                  name="commentsToFulfiller"
-                  control={control}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextArea
-                      enableCounter
-                      id="commentsToFulfillerInput"
-                      size="lg"
-                      labelText={t('commentsToFulfiller', 'Comments To Fulfiller')}
-                      value={value}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      maxCount={500}
-                      invalid={errors.commentsToFulfiller?.message}
-                      invalidText={errors.commentsToFulfiller?.message}
                     />
                   )}
                 />

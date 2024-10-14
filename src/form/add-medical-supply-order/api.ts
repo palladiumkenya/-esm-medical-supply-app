@@ -62,9 +62,6 @@ export function prepMedicalSupplyOrderPostData(
       concept: order.testType.conceptUuid,
       instructions: order.instructions,
       orderReason: order.orderReason,
-      commentToFulfiller: order.commentsToFulfiller,
-      laterality: order.laterality,
-      bodySite: order.bodySite,
       urgency: order.urgency,
     };
     if (order.urgency === "ON_SCHEDULED_DATE") {
@@ -74,7 +71,7 @@ export function prepMedicalSupplyOrderPostData(
   } else if (order.action === "REVISE") {
     payload = {
       action: "REVISE",
-      type: "procedureorder",
+      type: "medicalsupplyorder",
       patient: patientUuid,
       careSetting: order.careSetting,
       orderer: order.orderer,
@@ -82,9 +79,7 @@ export function prepMedicalSupplyOrderPostData(
       concept: order.testType.conceptUuid,
       instructions: order.instructions,
       orderReason: order.orderReason,
-      commentToFulfiller: order.commentsToFulfiller,
-      laterality: order.laterality,
-      bodySite: order.bodySite,
+
     };
     if (order.urgency === "ON_SCHEDULED_DATE") {
       payload["scheduledDate"] = order.scheduleDate;
@@ -93,16 +88,13 @@ export function prepMedicalSupplyOrderPostData(
   } else if (order.action === "DISCONTINUE") {
     payload = {
       action: "DISCONTINUE",
-      type: "procedureorder",
+      type: "medicalsupplyorder",
       patient: patientUuid,
       careSetting: order.careSetting,
       orderer: order.orderer,
       encounter: encounterUuid,
       concept: order.testType.conceptUuid,
       orderReason: order.orderReason,
-      commentToFulfiller: order.commentsToFulfiller,
-      laterality: order.laterality,
-      bodySite: order.bodySite,
     };
     if (order.urgency === "ON_SCHEDULED_DATE") {
       payload["scheduledDate"] = order.scheduleDate;
@@ -127,7 +119,7 @@ export function getConceptReferenceUrls(conceptUuids: Array<string>) {
   );
 }
 
-export type PostDataPrepLabOrderFunction = (
+export type PostDataPrepMedicalSupplyOrderFunction = (
   order: MedicalSupplyOrderBasketItem,
   patientUuid: string,
   encounterUuid: string

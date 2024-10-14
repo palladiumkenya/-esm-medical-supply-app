@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@carbon/react';
 import { ArrowLeft } from '@carbon/react/icons';
 import { age, formatDate, parseDate, useLayoutType, usePatient } from '@openmrs/esm-framework';
-import {type DefaultPatientWorkspaceProps, launchPatientWorkspace} from '@openmrs/esm-patient-common-lib';
-import { TestTypeSearch } from './medical-supply-type-search';
+import { type DefaultPatientWorkspaceProps, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
+import { MedicalSupplyTypeSearch } from './medical-supply-type-search';
 import { MedicalSupplyOrderForm } from './medical-supply-form.component';
 import styles from './add-medical-supply-order.scss';
 import { type MedicalSupplyOrderBasketItem } from '../../../types';
@@ -28,9 +28,7 @@ export default function AddMedicalSupplyOrderWorkspace({
   const { t } = useTranslation();
 
   const { patient, isLoading: isLoadingPatient } = usePatient();
-  const [currentMedicalSupplyOrder, setCurrentMedicalSupplyOrder] = useState(
-    initialOrder as MedicalSupplyOrderBasketItem,
-  );
+  const [currentMedicalSupplyOrder, setCurrentMedicalSupplyOrder] = useState(initialOrder);
 
   const isTablet = useLayoutType() === 'tablet';
 
@@ -43,23 +41,9 @@ export default function AddMedicalSupplyOrderWorkspace({
     });
   }, [closeWorkspace]);
 
-  return (
-    <div className={styles.container}>
-      {isTablet && !isLoadingPatient && (
-        <div className={styles.patientHeader}>
-          <span className={styles.bodyShort02}>{patientName}</span>
-          <span className={classNames(styles.text02, styles.bodyShort01)}>
-            {capitalize(patient?.gender)} &middot; {age(patient?.birthDate)} &middot;{' '}
-            <span>
-              {formatDate(parseDate(patient?.birthDate), {
-                mode: 'wide',
-                time: false,
-              })}
-            </span>
-          </span>
-        </div>
-      )}
-      {!isTablet && (
+  if (!currentMedicalSupplyOrder) {
+    return (
+      <>
         <div className={styles.backButton}>
           <Button
             kind="ghost"
@@ -71,17 +55,59 @@ export default function AddMedicalSupplyOrderWorkspace({
             <span>{t('backToOrderBasket', 'Back to order basket')}</span>
           </Button>
         </div>
-      )}
-      {!currentMedicalSupplyOrder ? (
-        <TestTypeSearch openLabForm={setCurrentMedicalSupplyOrder} />
-      ) : (
-        <MedicalSupplyOrderForm
-          initialOrder={currentMedicalSupplyOrder}
-          closeWorkspace={closeWorkspace}
-          closeWorkspaceWithSavedChanges={closeWorkspaceWithSavedChanges}
-          promptBeforeClosing={promptBeforeClosing}
-        />
-      )}
-    </div>
-  );
+        <MedicalSupplyTypeSearch openMedicalSupplyForm={setCurrentMedicalSupplyOrder} />
+      </>
+    );
+  } else {
+    return (
+      <MedicalSupplyOrderForm
+        initialOrder={currentMedicalSupplyOrder}
+        closeWorkspace={closeWorkspace}
+        closeWorkspaceWithSavedChanges={closeWorkspaceWithSavedChanges}
+        promptBeforeClosing={promptBeforeClosing}
+      />
+    );
+  }
+
+  // return (
+  //   <div className={styles.container}>
+  //     {isTablet && !isLoadingPatient && (
+  //       <div className={styles.patientHeader}>
+  //         <span className={styles.bodyShort02}>{patientName}</span>
+  //         <span className={classNames(styles.text02, styles.bodyShort01)}>
+  //           {capitalize(patient?.gender)} &middot; {age(patient?.birthDate)} &middot;{' '}
+  //           <span>
+  //             {formatDate(parseDate(patient?.birthDate), {
+  //               mode: 'wide',
+  //               time: false,
+  //             })}
+  //           </span>
+  //         </span>
+  //       </div>
+  //     )}
+  //     {!isTablet && (
+  //       <div className={styles.backButton}>
+  //         <Button
+  //           kind="ghost"
+  //           renderIcon={(props) => <ArrowLeft size={24} {...props} />}
+  //           iconDescription="Return to order basket"
+  //           size="sm"
+  //           onClick={cancelOrder}
+  //         >
+  //           <span>{t('backToOrderBasket', 'Back to order basket')}</span>
+  //         </Button>
+  //       </div>
+  //     )}
+  //     {!currentMedicalSupplyOrder ? (
+  //       <MedicalSupplyTypeSearch openMedicalSupplyForm={setCurrentMedicalSupplyOrder} />
+  //     ) : (
+  //       <MedicalSupplyOrderForm
+  //         initialOrder={currentMedicalSupplyOrder}
+  //         closeWorkspace={closeWorkspace}
+  //         closeWorkspaceWithSavedChanges={closeWorkspaceWithSavedChanges}
+  //         promptBeforeClosing={promptBeforeClosing}
+  //       />
+  //     )}
+  //   </div>
+  // );
 }
