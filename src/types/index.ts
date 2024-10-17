@@ -3,23 +3,7 @@ import { type OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 export interface Concept {
   uuid: string;
   display: string;
-  conceptClass: {
-    uuid: string;
-    display: string;
-    name: string;
-  };
-  answers: [];
   setMembers: [];
-  hiNormal: number;
-  hiAbsolute: number;
-  hiCritical: number;
-  lowNormal: number;
-  lowAbsolute: number;
-  lowCritical: number;
-  units: string;
-  allowDecimal: boolean;
-  displayPrecision: null;
-  attributes: [];
 }
 
 export interface MedicalSupplyOrderBasketItem extends OrderBasketItem {
@@ -31,6 +15,8 @@ export interface MedicalSupplyOrderBasketItem extends OrderBasketItem {
   instructions?: string;
   quantity?: number;
   quantityUnits?: string;
+  previousOrder?: string;
+  brandName?: string;
 }
 
 export type OrderFrequency = CommonMedicalSupplyValueCoded;
