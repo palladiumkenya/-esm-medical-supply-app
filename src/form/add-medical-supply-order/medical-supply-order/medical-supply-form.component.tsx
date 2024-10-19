@@ -29,6 +29,7 @@ import styles from './medical-supply-form.scss';
 import { type MedicalSupplyOrderBasketItem } from '../../../types';
 import { priorityOptions } from './medical-supply-order';
 import { careSettingUuid, prepMedicalSupplyOrderPostData } from '../api';
+import { useQuantityUnits } from '../../../hooks/useMedicalSupplyTypes';
 
 export interface MedicalSupplyOrderFormProps {
   initialOrder: MedicalSupplyOrderBasketItem;
@@ -56,6 +57,7 @@ export function MedicalSupplyOrderForm({
   const [showErrorNotification, setShowErrorNotification] = useState(false);
 
   const config = useConfig<MedicalSupplyConfig>();
+  const { quantityUnits } = useQuantityUnits();
 
   const medicalSupplyOrderFormSchema = z.object({
     instructions: z.string().optional(),
@@ -225,11 +227,12 @@ export function MedicalSupplyOrderForm({
                       size="lg"
                       id="quantityUnits"
                       titleText={t('quantityUnits', 'Quantity Units')}
-                      selectedItem={priorityOptions.find((option) => option.value === value) || null} // TODO: replace with actual units
-                      items={priorityOptions}
+                      selectedItem={quantityUnits?.find((option) => option?.uuid === value) || null}
+                      items={quantityUnits}
+                      itemToString={(item) => (item ? item?.display : '')}
                       onBlur={onBlur}
                       onChange={({ selectedItem }) => {
-                        onChange(selectedItem?.value || '');
+                        onChange(selectedItem?.uuid || '');
                       }}
                     />
                   )}

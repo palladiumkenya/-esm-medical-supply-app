@@ -1,23 +1,18 @@
-import useSWR from "swr";
-import {
-  type FetchResponse,
-  openmrsFetch,
-  restBaseUrl,
-  showSnackbar,
-} from "@openmrs/esm-framework";
-import type { OrderPost } from "@openmrs/esm-patient-common-lib";
-import useSWRImmutable from "swr/immutable";
-import { type MedicalSupplyOrderBasketItem } from "../../types";
+import useSWR from 'swr';
+import { type FetchResponse, openmrsFetch, restBaseUrl, showSnackbar } from '@openmrs/esm-framework';
+import type { OrderPost } from '@openmrs/esm-patient-common-lib';
+import useSWRImmutable from 'swr/immutable';
+import { type MedicalSupplyOrderBasketItem } from '../../types';
 
-export const careSettingUuid = "6f0c9a92-6f24-11e3-af88-005056821db0";
+export const careSettingUuid = '6f0c9a92-6f24-11e3-af88-005056821db0';
 
 export function useOrderReasons(conceptUuids: Array<string>) {
   const shouldFetch = conceptUuids && conceptUuids.length > 0;
   const url = shouldFetch ? getConceptReferenceUrls(conceptUuids) : null;
-  const { data, error, isLoading } = useSWRImmutable<
-    FetchResponse<ConceptResponse>,
-    Error
-  >(shouldFetch ? `${restBaseUrl}/${url[0]}` : null, openmrsFetch);
+  const { data, error, isLoading } = useSWRImmutable<FetchResponse<ConceptResponse>, Error>(
+    shouldFetch ? `${restBaseUrl}/${url[0]}` : null,
+    openmrsFetch,
+  );
 
   const ob = data?.data;
   const orderReasons = ob
@@ -31,7 +26,7 @@ export function useOrderReasons(conceptUuids: Array<string>) {
     showSnackbar({
       title: error.name,
       subtitle: error.message,
-      kind: "error",
+      kind: 'error',
     });
   }
 
@@ -46,13 +41,13 @@ export interface MedicalSupplyOrderPost extends OrderPost {
 export function prepMedicalSupplyOrderPostData(
   order: MedicalSupplyOrderBasketItem,
   patientUuid: string,
-  encounterUuid: string
+  encounterUuid: string,
 ): MedicalSupplyOrderPost {
   let payload = {};
-  if (order.action === "NEW" || order.action === "RENEW") {
+  if (order.action === 'NEW' || order.action === 'RENEW') {
     payload = {
-      action: "NEW",
-      type: "medicalsupplyorder",
+      action: 'NEW',
+      type: 'medicalsupplyorder',
       patient: patientUuid,
       careSetting: careSettingUuid,
       orderer: order.orderer,
@@ -60,30 +55,38 @@ export function prepMedicalSupplyOrderPostData(
       concept: order.testType.conceptUuid,
       instructions: order.instructions,
       urgency: order.urgency,
+      quantity: order.quantity,
+      quantityUnits: order.quantityUnits,
+      brandName: order.brandName,
     };
     return payload;
-  } else if (order.action === "REVISE") {
+  } else if (order.action === 'REVISE') {
     payload = {
-      action: "REVISE",
-      type: "medicalsupplyorder",
+      action: 'REVISE',
+      type: 'medicalsupplyorder',
       patient: patientUuid,
       careSetting: order.careSetting,
       orderer: order.orderer,
       encounter: encounterUuid,
       concept: order.testType.conceptUuid,
       instructions: order.instructions,
-
+      urgency: order.urgency,
+      quantity: order.quantity,
+      quantityUnits: order.quantityUnits,
+      brandName: order.brandName,
+      previousOrder: order.previousOrder,
     };
     return payload;
-  } else if (order.action === "DISCONTINUE") {
+  } else if (order.action === 'DISCONTINUE') {
     payload = {
-      action: "DISCONTINUE",
-      type: "medicalsupplyorder",
+      action: 'DISCONTINUE',
+      type: 'medicalsupplyorder',
       patient: patientUuid,
       careSetting: order.careSetting,
       orderer: order.orderer,
       encounter: encounterUuid,
       concept: order.testType.conceptUuid,
+      previousOrder: order.previousOrder,
     };
     return payload;
   } else {
@@ -97,18 +100,13 @@ export function getConceptReferenceUrls(conceptUuids: Array<string>) {
     accumulator.push(conceptUuids.slice(i, i + chunkSize));
   }
 
-  return accumulator.map(
-    (partition) =>
-      `conceptreferences?references=${partition.join(
-        ","
-      )}&v=custom:(uuid,display)`
-  );
+  return accumulator.map((partition) => `conceptreferences?references=${partition.join(',')}&v=custom:(uuid,display)`);
 }
 
 export type PostDataPrepMedicalSupplyOrderFunction = (
   order: MedicalSupplyOrderBasketItem,
   patientUuid: string,
-  encounterUuid: string
+  encounterUuid: string,
 ) => OrderPost;
 
 export interface ConceptAnswers {

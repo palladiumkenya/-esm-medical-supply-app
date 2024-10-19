@@ -4,7 +4,8 @@ import fuzzy from 'fuzzy';
 import { type FetchResponse, openmrsFetch, useConfig, restBaseUrl, reportError } from '@openmrs/esm-framework';
 
 import { type MedicalSupplyConfig } from '../config-schema';
-import {type Concept } from '../types';
+import { type Concept } from '../types';
+import useSWR from 'swr';
 
 type ConceptResult = FetchResponse<Concept>;
 type ConceptResults = FetchResponse<{ setMembers: Array<Concept> }>;
@@ -20,69 +21,13 @@ export interface UseMedicalSupplyType {
   error: Error;
 }
 
-function openmrsFetchMultiple(urls: Array<string>) {
-  // SWR has an RFC for `useSWRList`:
-  // https://github.com/vercel/swr/discussions/1988
-  // If that ever is implemented we should switch to using that.
-  return Promise.all(urls.map((url) => openmrsFetch<{ results: Array<Concept> }>(url)));
-}
-
-function useMedicalSupplyConceptsSWR(medicalSupplyOrderableConcepts?: Array<string>) {
+export function useQuantityUnits() {
   const config = useConfig<MedicalSupplyConfig>();
-  const { data, isLoading, error } = useSWRImmutable(
-    () =>
-        medicalSupplyOrderableConcepts
-        ? medicalSupplyOrderableConcepts.map((c) => `${restBaseUrl}/concept/${c}`)
-        : `${restBaseUrl}/concept/${config.medicalSupplyConceptSetUuid}?v=custom:setMembers`,
-    (medicalSupplyOrderableConcepts ? openmrsFetchMultiple : openmrsFetch) as any,
-    {
-      shouldRetryOnError(err) {
-        return err instanceof Response;
-      },
-    },
-  );
-
-  const results = useMemo(() => {
-    if (isLoading || error) return null;
-    return medicalSupplyOrderableConcepts
-      ? (data as Array<ConceptResult>)?.flatMap((d) => d.data.setMembers)
-      : (data as ConceptResults)?.data.setMembers ?? ([] as Concept[]);
-  }, [data, isLoading, error, medicalSupplyOrderableConcepts]);
-
+  const apiUrl = `${restBaseUrl}/concept/${config.medicalSupplyQuantityUnitsConceptSetUuid}?v=custom:setMembers`;
+  const { data, error, isLoading } = useSWR<{ data: Concept }, Error>(apiUrl, openmrsFetch);
   return {
-    data: results,
+    quantityUnits: data?.data?.setMembers ? data?.data?.setMembers : [],
     isLoading,
-    error,
-  };
-}
-
-export function useMedicalSupplyTypes(searchTerm = ''): UseMedicalSupplyType {
-  const { medicalSupplyOrderableConcepts } = useConfig<MedicalSupplyConfig>().orders;
-
-  const { data, isLoading, error } = useMedicalSupplyConceptsSWR(medicalSupplyOrderableConcepts.length ? medicalSupplyOrderableConcepts : null);
-
-  useEffect(() => {
-    if (error) {
-      reportError(error);
-    }
-  }, [error]);
-
-  const testConcepts = useMemo(() => {
-    return data?.map((concept) => ({
-      label: concept.display,
-      conceptUuid: concept.uuid,
-    }));
-  }, [data]);
-
-  const filteredMedicalSupplyTypes = useMemo(() => {
-    return searchTerm && !isLoading && !error
-      ? fuzzy.filter(searchTerm, testConcepts, { extract: (c) => c.label }).map((result) => result.original)
-      : testConcepts;
-  }, [testConcepts, searchTerm, error, isLoading]);
-
-  return {
-    medicalSupplyTypes: filteredMedicalSupplyTypes,
-    isLoading: isLoading,
-    error: error,
+    isError: error,
   };
 }
